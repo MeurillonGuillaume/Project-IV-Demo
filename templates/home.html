@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block Body %}
+    <div class="col-2">
+        <h2>Indices</h2>
+    </div>
+    <div class="col-6 text-center">
+        <h2>Query editor</h2>
+        <form>
+            <textarea name="query" cols="30" rows="10" placeholder="Enter your query..."></textarea>
+        </form>
+    </div>
+    <div class="col-4 text-center">
+        <h2>Resource monitor</h2>
+        <iframe src="http://localhost:3000/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=2"></iframe>
+        <iframe src="http://localhost:3000/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=4"></iframe>
+    </div>
+{% endblock %}
