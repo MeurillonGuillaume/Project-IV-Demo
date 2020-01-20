@@ -16,12 +16,11 @@ logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 app.secret_key = urandom(75)
 
-
 # Setup Spark
 # spark = Spark(secrets['spark']['server'], 'Project-IV-Demo-app', secrets['spark']['port'])
 
 # Setup Elasticsearch
-# elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
+elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
 
 
 def is_user_loggedin():
@@ -44,7 +43,9 @@ def home():
     Go to the homepage
     """
     if is_user_loggedin():
-        return render_template('home.html', Loggedin=True)
+        return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
+                               Elastichost=secrets['elastic']['server'],
+                               Elasticport=secrets['elastic']['port'])
     return render_template('login.html')
 
 
@@ -72,6 +73,12 @@ def logout():
     if is_user_loggedin():
         logging.info('Logging out')
         session['loggedin'] = False
+    return redirect('/')
+
+
+@app.route('/query', methods=['GET', 'POST'])
+def query():
+    # TODO: implement queries
     return redirect('/')
 
 

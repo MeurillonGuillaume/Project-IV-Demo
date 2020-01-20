@@ -9,7 +9,7 @@ class Spark:
         Connect to the Spark master
         """
         try:
-            # findspark.init(spark_home='/usr/local/spark')
+            findspark.init(spark_home='/usr/local/spark')
             self.__sparkcontext = SparkContext(master=f'spark://{host}:{port}', appName=appname)
             logging.info('Connected to Spark!')
         except Exception as e:

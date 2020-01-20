@@ -1,15 +1,54 @@
 {% extends 'base.html' %}
 {% block Body %}
-    <div class="col-2">
-        <h2>Indices</h2>
+    <div class="col-lg-2">
+        <h2>Elasticsearch indices</h2>
+        <ol>
+            {% if Indices and Elastichost and Elasticport %}
+                {% for idx in Indices %}
+                    <li><a href="http://{{ Elastichost }}:{{ Elasticport }}/{{ idx }}/_search?pretty=true"
+                           target="_blank">{{ idx }}</a></li>
+                {% endfor %}
+            {% else %}
+                <li>No indices found</li>
+            {% endif %}
+        </ol>
     </div>
-    <div class="col-6 text-center">
+
+    <div class="col-lg-6 text-center">
         <h2>Query editor</h2>
-        <form>
-            <textarea name="query" cols="30" rows="10" placeholder="Enter your query..."></textarea>
+        <form method="post" action="/query">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="querysource">Query source</label>
+                </div>
+                <select class="custom-select" id="querysource" name="querysource">
+                    <option value="spark">Apache Spark</option>
+                    <option value="elastic">Elasticsearch</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="querytype">Query type</label>
+                </div>
+                <select class="custom-select" id="querytype" name="querytype">
+                    <option value="sql">SQL</option>
+                    <option value="dsl">DSL (Elasticsearch only)</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Query</span>
+                </div>
+                <textarea class="form-control" required placeholder="SELECT * FROM table"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-outline-success">Submit query</button>
         </form>
     </div>
-    <div class="col-4 text-center">
+
+    <div class="col-lg-4 text-center">
         <h2>Resource monitor</h2>
         <iframe src="http://localhost:3000/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=2"></iframe>
         <iframe src="http://localhost:3000/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=4"></iframe>
