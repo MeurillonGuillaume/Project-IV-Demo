@@ -505,3 +505,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/vim,linux,macos,spark,flask,python,windows,pycharm+all,jetbrains+all,jupyternotebooks,visualstudiocode
+
+# Ignore secrets file
+secrets.json
