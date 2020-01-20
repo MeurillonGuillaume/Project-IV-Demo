@@ -45,7 +45,8 @@ def home():
     if is_user_loggedin():
         return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
                                Elastichost=secrets['elastic']['server'],
-                               Elasticport=secrets['elastic']['port'])
+                               Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
+                               Grafanaport=secrets['grafana']['port'])
     return render_template('login.html')
 
 
@@ -79,6 +80,9 @@ def logout():
 @app.route('/query', methods=['GET', 'POST'])
 def query():
     # TODO: implement queries
+    if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form:
+        logging.info(
+            f'Requesting query of type {request.form["querytype"]} on {request.form["querysource"]}: "{request.form["query"]}"')
     return redirect('/')
 
 

@@ -41,7 +41,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">Query</span>
                 </div>
-                <textarea class="form-control" required placeholder="SELECT * FROM table"></textarea>
+                <textarea name="query" class="form-control" required placeholder="SELECT * FROM table"></textarea>
             </div>
 
             <button type="submit" class="btn btn-outline-success">Submit query</button>
@@ -50,7 +50,7 @@
 
     <div class="col-lg-4 text-center">
         <h2>Resource monitor</h2>
-        <iframe src="http://localhost:3000/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=2"></iframe>
-        <iframe src="http://localhost:3000/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=4"></iframe>
+        <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=2"></iframe>
+        <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=4"></iframe>
     </div>
 {% endblock %}
