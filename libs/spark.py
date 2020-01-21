@@ -46,6 +46,7 @@ class Spark:
                 "es.resource": indexname
             })
         data_rdd = data_rdd.cache()
+        data_rdd = self.__drop_elastic_ids(data_rdd)
         df = self.__sqlcontext.createDataFrame(data_rdd)
         df.registerTempTable(indexname)
 
@@ -76,6 +77,12 @@ class Spark:
 
         # Define using Python3 on the Spark server-side instead of default Python2.7
         os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3"
+
+    def __drop_elastic_ids(self, rdd):
+        """
+        Simplify queries by dropping the ID created by Elasticsearch in Spark documents
+        """
+        return self.__sparkcontext.parallelize([x[1] for x in rdd.take(rdd.count())])
 
     def __del__(self):
         """
