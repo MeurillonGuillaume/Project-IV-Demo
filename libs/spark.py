@@ -12,7 +12,7 @@ class Spark:
         Connect to the Spark master
         """
         try:
-            # findspark.init(spark_home='/usr/local/spark')
+            findspark.init(spark_home='/usr/local/spark')
             self.__es_hadoop_ver = es_hadoop_ver
             self.__install_elastic_hadoop()
             self.__internal_nodes = internal_nodes

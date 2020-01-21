@@ -9,6 +9,7 @@ from libs.timer import Timer
 
 PREV_RESPONSE = ''
 PREV_RESPONSETIME = 0
+PREV_QUERY = ''
 # Load application secrets
 secrets = json.load(open('./static/secrets.json'))
 
@@ -52,13 +53,13 @@ def home():
     if is_user_loggedin():
         if len(PREV_RESPONSE) > 1:
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
-                                   Elastichost=secrets['elastic']['server'],
+                                   Elastichost=secrets['elastic']['server_exteral'],
                                    Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
                                    Grafanaport=secrets['grafana']['port'], Response=PREV_RESPONSE,
-                                   Responsetime=PREV_RESPONSETIME)
+                                   Responsetime=PREV_RESPONSETIME, Prevquery=PREV_QUERY)
         else:
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
-                                   Elastichost=secrets['elastic']['server'],
+                                   Elastichost=secrets['elastic']['server_exteral'],
                                    Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
                                    Grafanaport=secrets['grafana']['port'])
     return render_template('login.html')
@@ -93,9 +94,10 @@ def logout():
 
 @app.route('/query', methods=['GET', 'POST'])
 def query():
-    global PREV_RESPONSE, PREV_RESPONSETIME
+    global PREV_RESPONSE, PREV_RESPONSETIME, PREV_QUERY
     if is_user_loggedin():
         if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form:
+            PREV_QUERY = request.form['query']
             try:
                 timer.start()
                 if request.form['querytype'] == 'sql':
@@ -113,4 +115,4 @@ def query():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True, port=5000)
+    app.run(host='0.0.0.0', debug=False, port=5000)

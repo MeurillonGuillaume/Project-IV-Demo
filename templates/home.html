@@ -53,7 +53,12 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">Query</span>
                 </div>
-                <textarea name="query" class="form-control" placeholder="SELECT * FROM table"></textarea>
+                {% if Prevquery %}
+                    <textarea name="query"
+                              class="form-control" placeholder="SELECT * FROM table">{{ Prevquery }}</textarea>
+                {% else %}
+                    <textarea name="query" class="form-control" placeholder="SELECT * FROM table"></textarea>
+                {% endif %}
             </div>
 
             <button type="submit" class="btn btn-outline-success">Submit query</button>
@@ -65,7 +70,7 @@
                     <span class="input-group-text">Last query response</span>
                 </div>
                 <textarea name="response" class="form-control"
-                          placeholder="" readonly>{{ Response }}</textarea>
+                          placeholder="" rows="5" readonly>{{ Response }}</textarea>
             </div>
         {% endif %}
 
