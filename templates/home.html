@@ -61,7 +61,24 @@
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn btn-outline-success">Submit query</button>
+            <button type="submit" class="btn btn-outline-success" data-toggle="modal" data-target="#demo">
+                Submit query
+            </button>
+            <div class="modal" id="demo">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Query notice</h4>
+                            <button type="button" class="close" data-dismiss="modal">x</button>
+                        </div>
+                        <!-- Modal body -->
+                        <div class="modal-body">The query you entered is loading. This can take a while, please don't
+                            refresh the page.
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
 
         {% if Response %}
@@ -75,8 +92,10 @@
         {% endif %}
         {% if ResponseTooLong %}
             <div class="alert alert-primary mb-3" role="alert">
-                The result of the previous query was too long! Visit <a href="/fullresult" target="_blank">this page</a>
-                to view the full result!
+                The result of the previous query was too long to display here. Visit <a href="/fullresult"
+                                                                                        target="_blank">this
+                page</a> to
+                view the full result.
             </div>
         {% endif %}
 
