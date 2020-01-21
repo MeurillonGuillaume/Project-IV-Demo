@@ -46,6 +46,16 @@
 
             <button type="submit" class="btn btn-outline-success">Submit query</button>
         </form>
+
+        {% if Response %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Response</span>
+                </div>
+                <textarea name="response" class="form-control" required
+                          placeholder="" readonly>{{ Response }}</textarea>
+            </div>
+        {% endif %}
     </div>
 
     <div class="col-lg-4 text-center">

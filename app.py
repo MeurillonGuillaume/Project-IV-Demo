@@ -6,6 +6,7 @@ from passlib.hash import bcrypt
 from libs.spark import Spark
 from libs.elastic import Elastic
 
+PREV_RESPONSE = ''
 # Load application secrets
 secrets = json.load(open('./static/secrets.json'))
 
@@ -43,10 +44,16 @@ def home():
     Go to the homepage
     """
     if is_user_loggedin():
-        return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
-                               Elastichost=secrets['elastic']['server'],
-                               Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
-                               Grafanaport=secrets['grafana']['port'])
+        if len(PREV_RESPONSE) > 1:
+            return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
+                                   Elastichost=secrets['elastic']['server'],
+                                   Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
+                                   Grafanaport=secrets['grafana']['port'], Response=PREV_RESPONSE)
+        else:
+            return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
+                                   Elastichost=secrets['elastic']['server'],
+                                   Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
+                                   Grafanaport=secrets['grafana']['port'])
     return render_template('login.html')
 
 
@@ -79,8 +86,14 @@ def logout():
 
 @app.route('/query', methods=['GET', 'POST'])
 def query():
-    # TODO: implement queries
+    global PREV_RESPONSE
     if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form:
+        try:
+            if request.form['querytype'] == 'sql':
+                if request.form['querysource'] == 'elastic':
+                    PREV_RESPONSE = elastic.query_sql(request.form['query'])
+        except Exception as e:
+            logging.error(f'Error querying: {e}')
         logging.info(
             f'Requesting query of type {request.form["querytype"]} on {request.form["querysource"]}: "{request.form["query"]}"')
     return redirect('/')
