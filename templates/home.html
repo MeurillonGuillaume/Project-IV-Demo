@@ -39,6 +39,18 @@
 
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
+                    <label class="input-group-text" for="queryindex">Index to query (DSL only)</label>
+                </div>
+                <select class="custom-select" id="queryindex" name="index">
+                    <option value="-">-- Specify in SQL query --</option>
+                    {% for index in Indices %}
+                        <option value="{{ index }}">{{ index }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
                     <span class="input-group-text">Query</span>
                 </div>
                 <textarea name="query" class="form-control" required placeholder="SELECT * FROM table"></textarea>
@@ -47,7 +59,7 @@
             <button type="submit" class="btn btn-outline-success">Submit query</button>
         </form>
 
-        {% if Response and Responsetime %}
+        {% if Response %}
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Last query response</span>
@@ -55,12 +67,15 @@
                 <textarea name="response" class="form-control"
                           placeholder="" readonly>{{ Response }}</textarea>
             </div>
+        {% endif %}
+
+        {% if Responsetime %}
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Query time</span>
                 </div>
-                <textarea name="response" class="form-control"
-                          placeholder="" readonly>Request took {{ Responsetime }} seconds</textarea>
+                <textarea name="response" class="form-control" rows="1" placeholder=""
+                          readonly>Request took {{ Responsetime }} ms</textarea>
             </div>
         {% endif %}
     </div>

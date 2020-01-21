@@ -100,7 +100,7 @@ def query():
                 if request.form['querysource'] == 'elastic':
                     PREV_RESPONSE = elastic.query_sql(request.form['query'])
             elif request.form['querytype'] == 'dsl' and request.form['querysource'] == 'elastic':
-                PREV_RESPONSE = elastic.query_dsl(request.form['query'], 'redlight_violation')
+                PREV_RESPONSE = elastic.query_dsl(request.form['query'], request.form['index'])
             PREV_RESPONSETIME = timer.stop()
         except Exception as e:
             logging.error(f'Error querying: {e}')

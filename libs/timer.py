@@ -15,4 +15,4 @@ class Timer:
         """
         Return the total timecount
         """
-        return time.time() - self.__starttime
+        return int((time.time() - self.__starttime) * 1000)
