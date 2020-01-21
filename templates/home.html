@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block Body %}
+    <div class="col-lg-2 pt-2 pb-2">
+        <h2>Elasticsearch indices</h2>
+        <ol>
+            {% if Indices and Elastichost and Elasticport %}
+                {% for idx in Indices %}
+                    <li><a href="http://{{ Elastichost }}:{{ Elasticport }}/{{ idx }}/_search?pretty=true"
+                           target="_blank">{{ idx }}</a></li>
+                {% endfor %}
+            {% else %}
+                <li>No indices found</li>
+            {% endif %}
+        </ol>
+    </div>
+
+    <div class="col-lg-6 text-center bg-light pt-2 pb-2">
+        <h2>Query editor</h2>
+        <form method="post" action="/query">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="querysource">Query source</label>
+                </div>
+                <select class="custom-select" id="querysource" name="querysource">
+                    <option value="spark">Apache Spark</option>
+                    <option value="elastic">Elasticsearch</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="querytype">Query type</label>
+                </div>
+                <select class="custom-select" id="querytype" name="querytype">
+                    <option value="sql">SQL</option>
+                    <option value="dsl">DSL (Elasticsearch only)</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="queryindex">Which index to query (DSL only)</label>
+                </div>
+                <select class="custom-select" id="queryindex" name="index">
+                    <option value="-">-- Specify in DSL queries only --</option>
+                    {% for index in Indices %}
+                        <option value="{{ index }}">{{ index }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Amount of threads</span>
+                </div>
+                <input type="number" class="form-control" value="1" min="1" max="4000" name="threads" required/>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Query</span>
+                </div>
+                {% if Prevquery %}
+                    <textarea name="query"
+                              class="form-control" placeholder="SELECT * FROM table">{{ Prevquery }}</textarea>
+                {% else %}
+                    <textarea name="query" class="form-control" placeholder="SELECT * FROM table"></textarea>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-outline-success" data-toggle="modal" data-target="#demo">
+                Submit query
+            </button>
+            <div class="modal" id="demo">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Query notice</h4>
+                            <button type="button" class="close" data-dismiss="modal">x</button>
+                        </div>
+                        <!-- Modal body -->
+                        <div class="modal-body">The query you entered is loading. This can take a while, please don't
+                            refresh the page.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {% if Response %}
+            <div class="input-group mb-3 mt-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Last query response</span>
+                </div>
+                <textarea name="response" class="form-control"
+                          placeholder="" rows="5" readonly>{{ Response }}</textarea>
+            </div>
+        {% endif %}
+        {% if ResponseTooLong %}
+            <div class="alert alert-primary mb-3" role="alert">
+                The result of the previous query was too long to display here. Visit <a href="/fullresult"
+                                                                                        target="_blank">this
+                page</a> to
+                view the full result.
+            </div>
+        {% endif %}
+
+        {% if Responsetime %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Query time</span>
+                </div>
+                <textarea name="response" class="form-control" rows="1" placeholder=""
+                          readonly>Request took {{ Responsetime }}ms</textarea>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4 text-center pt-2 pb-2">
+        <h2>Resource monitor</h2>
+        <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=2"></iframe>
+        <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=4"></iframe>
+    </div>
+{% endblock %}
