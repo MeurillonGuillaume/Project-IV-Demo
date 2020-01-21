@@ -5,8 +5,10 @@ from flask import Flask, session, request, render_template, redirect
 from passlib.hash import bcrypt
 from libs.spark import Spark
 from libs.elastic import Elastic
+from libs.timer import Timer
 
 PREV_RESPONSE = ''
+PREV_RESPONSETIME = 0
 # Load application secrets
 secrets = json.load(open('./static/secrets.json'))
 
@@ -22,6 +24,9 @@ app.secret_key = urandom(75)
 
 # Setup Elasticsearch
 elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
+
+# Create timer
+timer = Timer()
 
 
 def is_user_loggedin():
@@ -48,7 +53,8 @@ def home():
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
                                    Elastichost=secrets['elastic']['server'],
                                    Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
-                                   Grafanaport=secrets['grafana']['port'], Response=PREV_RESPONSE)
+                                   Grafanaport=secrets['grafana']['port'], Response=PREV_RESPONSE,
+                                   Responsetime=PREV_RESPONSETIME)
         else:
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
                                    Elastichost=secrets['elastic']['server'],
@@ -86,12 +92,16 @@ def logout():
 
 @app.route('/query', methods=['GET', 'POST'])
 def query():
-    global PREV_RESPONSE
+    global PREV_RESPONSE, PREV_RESPONSETIME
     if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form:
         try:
+            timer.start()
             if request.form['querytype'] == 'sql':
                 if request.form['querysource'] == 'elastic':
                     PREV_RESPONSE = elastic.query_sql(request.form['query'])
+            elif request.form['querytype'] == 'dsl' and request.form['querysource'] == 'elastic':
+                PREV_RESPONSE = elastic.query_dsl(request.form['query'], 'redlight_violation')
+            PREV_RESPONSETIME = timer.stop()
         except Exception as e:
             logging.error(f'Error querying: {e}')
         logging.info(

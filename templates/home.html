@@ -47,13 +47,20 @@
             <button type="submit" class="btn btn-outline-success">Submit query</button>
         </form>
 
-        {% if Response %}
+        {% if Response and Responsetime %}
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <span class="input-group-text">Response</span>
+                    <span class="input-group-text">Last query response</span>
                 </div>
-                <textarea name="response" class="form-control" required
+                <textarea name="response" class="form-control"
                           placeholder="" readonly>{{ Response }}</textarea>
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Query time</span>
+                </div>
+                <textarea name="response" class="form-control"
+                          placeholder="" readonly>Request took {{ Responsetime }} seconds</textarea>
             </div>
         {% endif %}
     </div>
