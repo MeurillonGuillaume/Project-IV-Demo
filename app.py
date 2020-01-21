@@ -55,7 +55,7 @@ def fullresult():
     Return the full query result
     """
     if is_user_loggedin():
-        return PREV_RESPONSE
+        return json.dumps(PREV_RESPONSE, indent=4)
     return redirect('/')
 
 
