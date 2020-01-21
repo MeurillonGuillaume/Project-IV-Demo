@@ -6,6 +6,7 @@ from passlib.hash import bcrypt
 from libs.spark import Spark
 from libs.elastic import Elastic
 from libs.timer import Timer
+from libs.threader import Threader
 
 PREV_RESPONSE = ''
 PREV_RESPONSETIME = 0
@@ -30,6 +31,10 @@ elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
 # Create timer
 timer = Timer()
 
+# Create threader
+threader = Threader()
+
+# Load index data to Spark
 for idx in elastic.get_user_indices():
     logging.info(f'Loading index {idx} into Spark')
     spark.load_index(idx)
@@ -119,17 +124,41 @@ def logout():
 def query():
     global PREV_RESPONSE, PREV_RESPONSETIME, PREV_QUERY
     if is_user_loggedin():
-        if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form:
+        if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form and 'threads' in request.form:
+            threads = int(request.form['threads'])
+            running_threads = len(threader.check_threads()) + 1
             PREV_QUERY = request.form['query']
             try:
                 timer.start()
                 if request.form['querytype'] == 'sql':
                     if request.form['querysource'] == 'elastic':
-                        PREV_RESPONSE = elastic.query_sql(request.form['query'])
+                        if threads == 1:
+                            PREV_RESPONSE = elastic.query_sql(request.form['query'])
+                        elif threads > 1:
+                            threader.launch_threads(elastic.query_sql, threads, (request.form['query'],))
+                            while len(threader.check_threads()) > running_threads:
+                                # waste cycles
+                                ...
+                            PREV_RESPONSE = json.dumps({"status": "All threads have finished successfully"}, indent=4)
                     elif request.form['querysource'] == 'spark':
-                        PREV_RESPONSE = spark.query_spark_sql(request.form['query'])
+                        if threads == 1:
+                            PREV_RESPONSE = spark.query_spark_sql(request.form['query'])
+                        elif threads > 1:
+                            threader.launch_threads(spark.query_spark_sql_fast, threads, (request.form['query'],))
+                            while len(threader.check_threads()) > running_threads:
+                                # waste cycles
+                                ...
+                            PREV_RESPONSE = json.dumps({"status": "All threads have finished successfully"}, indent=4)
                 elif request.form['querytype'] == 'dsl' and request.form['querysource'] == 'elastic':
-                    PREV_RESPONSE = elastic.query_dsl(request.form['query'], request.form['index'])
+                    if threads == 1:
+                        PREV_RESPONSE = elastic.query_dsl(request.form['query'], request.form['index'])
+                    elif threads > 1:
+                        threader.launch_threads(elastic.query_dsl, threads,
+                                                (request.form['query'], request.form['index']))
+                        while len(threader.check_threads()) > running_threads:
+                            # waste cycles
+                            ...
+                        PREV_RESPONSE = json.dumps({"status": "All threads have finished successfully"}, indent=4)
                 PREV_RESPONSETIME = timer.stop()
             except Exception as e:
                 logging.error(f'Error querying: {e}')

@@ -31,6 +31,12 @@ class Spark:
         response_rdd = self.__sqlcontext.sql(query)
         return json.dumps(response_rdd.toPandas().to_dict(orient='records'), indent=4)
 
+    def query_spark_sql_fast(self, query):
+        """
+        Same as the normal query function, without any conversions
+        """
+        return self.__sqlcontext.sql(query)
+
     def load_index(self, indexname):
         """
         Load an Elasticsearch index
