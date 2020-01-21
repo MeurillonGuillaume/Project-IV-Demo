@@ -93,20 +93,22 @@ def logout():
 @app.route('/query', methods=['GET', 'POST'])
 def query():
     global PREV_RESPONSE, PREV_RESPONSETIME
-    if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form:
-        try:
-            timer.start()
-            if request.form['querytype'] == 'sql':
-                if request.form['querysource'] == 'elastic':
-                    PREV_RESPONSE = elastic.query_sql(request.form['query'])
-            elif request.form['querytype'] == 'dsl' and request.form['querysource'] == 'elastic':
-                PREV_RESPONSE = elastic.query_dsl(request.form['query'], request.form['index'])
-            PREV_RESPONSETIME = timer.stop()
-        except Exception as e:
-            logging.error(f'Error querying: {e}')
-        logging.info(
-            f'Requesting query of type {request.form["querytype"]} on {request.form["querysource"]}: "{request.form["query"]}"')
-    return redirect('/')
+    if is_user_loggedin():
+        if 'query' in request.form and 'querytype' in request.form and 'querysource' in request.form:
+            try:
+                timer.start()
+                if request.form['querytype'] == 'sql':
+                    if request.form['querysource'] == 'elastic':
+                        PREV_RESPONSE = elastic.query_sql(request.form['query'])
+                elif request.form['querytype'] == 'dsl' and request.form['querysource'] == 'elastic':
+                    PREV_RESPONSE = elastic.query_dsl(request.form['query'], request.form['index'])
+                PREV_RESPONSETIME = timer.stop()
+            except Exception as e:
+                logging.error(f'Error querying: {e}')
+                PREV_RESPONSE = f'Something went wrong: {e}'
+            logging.info(
+                f'Requesting query of type {request.form["querytype"]} on {request.form["querysource"]}: "{request.form["query"]}"')
+        return redirect('/')
 
 
 if __name__ == '__main__':

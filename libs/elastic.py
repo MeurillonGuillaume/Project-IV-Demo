@@ -25,6 +25,7 @@ class Elastic:
         """
         Query Elasticsearch with SQL
         """
+        q = str(q).replace('"', '\"')
         return requests.post(f'http://{self.__host}:{self.__port}/_xpack/sql?format=json&pretty=true',
                              data=json.dumps({'query': q}),
                              headers={

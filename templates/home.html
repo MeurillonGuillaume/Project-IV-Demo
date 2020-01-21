@@ -42,7 +42,7 @@
                     <label class="input-group-text" for="queryindex">Index to query (DSL only)</label>
                 </div>
                 <select class="custom-select" id="queryindex" name="index">
-                    <option value="-">-- Specify in SQL query --</option>
+                    <option value="-">-- Specify in DSL queries only --</option>
                     {% for index in Indices %}
                         <option value="{{ index }}">{{ index }}</option>
                     {% endfor %}
@@ -53,14 +53,14 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">Query</span>
                 </div>
-                <textarea name="query" class="form-control" required placeholder="SELECT * FROM table"></textarea>
+                <textarea name="query" class="form-control" placeholder="SELECT * FROM table"></textarea>
             </div>
 
             <button type="submit" class="btn btn-outline-success">Submit query</button>
         </form>
 
         {% if Response %}
-            <div class="input-group mb-3">
+            <div class="input-group mb-3 mt-3">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Last query response</span>
                 </div>
