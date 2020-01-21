@@ -39,7 +39,7 @@
 
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <label class="input-group-text" for="queryindex">Index to query (DSL only)</label>
+                    <label class="input-group-text" for="queryindex">Which index to query (DSL only)</label>
                 </div>
                 <select class="custom-select" id="queryindex" name="index">
                     <option value="-">-- Specify in DSL queries only --</option>
@@ -47,6 +47,13 @@
                         <option value="{{ index }}">{{ index }}</option>
                     {% endfor %}
                 </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Amount of threads</span>
+                </div>
+                <input type="number" class="form-control" value="1" min="1" max="4000" name="threads" required/>
             </div>
 
             <div class="input-group mb-3">
