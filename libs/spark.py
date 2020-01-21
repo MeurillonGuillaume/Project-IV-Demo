@@ -3,6 +3,7 @@ import os
 import zipfile
 from urllib import request
 import findspark
+import json
 from pyspark import SparkContext, SQLContext
 
 
@@ -22,22 +23,22 @@ class Spark:
         except Exception as e:
             logging.error(f'Error connecting to Spark: {e}')
 
+    def query_spark_sql(self, query):
+        return json.dumps(json.loads(self.__sqlcontext.sql(query)), indent=4)
+
     def load_index(self, indexname):
         """
         Load an Elasticsearch index
         :param indexname:
         :return:
         """
-        nodestring = ''
-        for node in self.__internal_nodes:
-            nodestring += f'{node},'
         data_rdd = self.__sparkcontext.newAPIHadoopRDD(
             inputFormatClass="org.elasticsearch.hadoop.mr.EsInputFormat",
             keyClass="org.apache.hadoop.io.NullWritable",
             valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
             conf={
                 # specify the node that we are reading data from
-                "es.nodes": nodestring,
+                "es.nodes": self.__internal_nodes,
                 # specify the read index
                 "es.resource": indexname
             })

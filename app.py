@@ -22,13 +22,17 @@ app.secret_key = urandom(75)
 
 # Setup Spark
 spark = Spark(secrets['spark']['server'], 'Project-IV-Demo-app', secrets['elastic']['version'],
-              secrets['spark']['port'])
+              secrets['elastic']['internal'], secrets['spark']['port'])
 
 # Setup Elasticsearch
 elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
 
 # Create timer
 timer = Timer()
+
+for idx in elastic.get_user_indices():
+    logging.info(f'Loading index {idx} into Spark')
+    spark.load_index(idx)
 
 
 def is_user_loggedin():
