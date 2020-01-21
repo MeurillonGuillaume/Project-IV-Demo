@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block Body %}
-    <div class="col-lg-2">
+    <div class="col-lg-2 pt-2 pb-2">
         <h2>Elasticsearch indices</h2>
         <ol>
             {% if Indices and Elastichost and Elasticport %}
@@ -14,7 +14,7 @@
         </ol>
     </div>
 
-    <div class="col-lg-6 text-center">
+    <div class="col-lg-6 text-center bg-light pt-2 pb-2">
         <h2>Query editor</h2>
         <form method="post" action="/query">
             <div class="input-group mb-3">
@@ -110,7 +110,7 @@
         {% endif %}
     </div>
 
-    <div class="col-lg-4 text-center">
+    <div class="col-lg-4 text-center pt-2 pb-2">
         <h2>Resource monitor</h2>
         <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=2"></iframe>
         <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=4"></iframe>
