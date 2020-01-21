@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block Body %}
-    <div class="col-lg-2">
+    <div class="col-lg-2 pt-2 pb-2">
         <h2>Elasticsearch indices</h2>
         <ol>
             {% if Indices and Elastichost and Elasticport %}
@@ -14,7 +14,7 @@
         </ol>
     </div>
 
-    <div class="col-lg-6 text-center">
+    <div class="col-lg-6 text-center bg-light pt-2 pb-2">
         <h2>Query editor</h2>
         <form method="post" action="/query">
             <div class="input-group mb-3">
@@ -61,7 +61,24 @@
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn btn-outline-success">Submit query</button>
+            <button type="submit" class="btn btn-outline-success" data-toggle="modal" data-target="#demo">
+                Submit query
+            </button>
+            <div class="modal" id="demo">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Query notice</h4>
+                            <button type="button" class="close" data-dismiss="modal">x</button>
+                        </div>
+                        <!-- Modal body -->
+                        <div class="modal-body">The query you entered is loading. This can take a while, please don't
+                            refresh the page.
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
 
         {% if Response %}
@@ -71,6 +88,14 @@
                 </div>
                 <textarea name="response" class="form-control"
                           placeholder="" rows="5" readonly>{{ Response }}</textarea>
+            </div>
+        {% endif %}
+        {% if ResponseTooLong %}
+            <div class="alert alert-primary mb-3" role="alert">
+                The result of the previous query was too long to display here. Visit <a href="/fullresult"
+                                                                                        target="_blank">this
+                page</a> to
+                view the full result.
             </div>
         {% endif %}
 
@@ -85,7 +110,7 @@
         {% endif %}
     </div>
 
-    <div class="col-lg-4 text-center">
+    <div class="col-lg-4 text-center pt-2 pb-2">
         <h2>Resource monitor</h2>
         <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=2"></iframe>
         <iframe src="http://{{ Grafanaserver }}:{{ Grafanaport }}/d-solo/m53AzUEZk/node-stats?orgId=1&refresh=5s&theme=light&panelId=4"></iframe>

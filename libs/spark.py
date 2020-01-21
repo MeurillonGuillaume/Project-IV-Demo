@@ -2,7 +2,9 @@ import logging
 import os
 import zipfile
 from urllib import request
+import pandas as pd
 import findspark
+import json
 from pyspark import SparkContext, SQLContext
 
 
@@ -22,25 +24,29 @@ class Spark:
         except Exception as e:
             logging.error(f'Error connecting to Spark: {e}')
 
+    def query_spark_sql(self, query):
+        """
+        Query the SQLContext API with SQL queries
+        """
+        response_rdd = self.__sqlcontext.sql(query)
+        return json.dumps(response_rdd.toPandas().to_dict(orient='records'), indent=4)
+
     def load_index(self, indexname):
         """
         Load an Elasticsearch index
-        :param indexname:
-        :return:
         """
-        nodestring = ''
-        for node in self.__internal_nodes:
-            nodestring += f'{node},'
         data_rdd = self.__sparkcontext.newAPIHadoopRDD(
             inputFormatClass="org.elasticsearch.hadoop.mr.EsInputFormat",
             keyClass="org.apache.hadoop.io.NullWritable",
             valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
             conf={
                 # specify the node that we are reading data from
-                "es.nodes": nodestring,
+                "es.nodes": self.__internal_nodes,
                 # specify the read index
                 "es.resource": indexname
             })
+        data_rdd = data_rdd.cache()
+        data_rdd = self.__drop_elastic_ids(data_rdd)
         df = self.__sqlcontext.createDataFrame(data_rdd)
         df.registerTempTable(indexname)
 
@@ -71,6 +77,12 @@ class Spark:
 
         # Define using Python3 on the Spark server-side instead of default Python2.7
         os.environ["PYSPARK_PYTHON"] = "/usr/bin/python3"
+
+    def __drop_elastic_ids(self, rdd):
+        """
+        Simplify queries by dropping the ID created by Elasticsearch in Spark documents
+        """
+        return self.__sparkcontext.parallelize([x[1] for x in rdd.take(rdd.count())])
 
     def __del__(self):
         """

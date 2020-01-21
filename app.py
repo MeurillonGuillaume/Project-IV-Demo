@@ -22,13 +22,17 @@ app.secret_key = urandom(75)
 
 # Setup Spark
 spark = Spark(secrets['spark']['server'], 'Project-IV-Demo-app', secrets['elastic']['version'],
-              secrets['spark']['port'])
+              secrets['elastic']['internal'], secrets['spark']['port'])
 
 # Setup Elasticsearch
 elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
 
 # Create timer
 timer = Timer()
+
+for idx in elastic.get_user_indices():
+    logging.info(f'Loading index {idx} into Spark')
+    spark.load_index(idx)
 
 
 def is_user_loggedin():
@@ -45,17 +49,36 @@ def is_user_loggedin():
     return False
 
 
+@app.route('/fullresult')
+def fullresult():
+    """
+    Return the full query result
+    """
+    if is_user_loggedin():
+        return json.dumps(PREV_RESPONSE, indent=4)
+    return redirect('/')
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     """
     Go to the homepage
     """
     if is_user_loggedin():
-        if len(PREV_RESPONSE) > 1:
+        if len(PREV_RESPONSE) > 10000:
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
                                    Elastichost=secrets['elastic']['server_exteral'],
                                    Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
-                                   Grafanaport=secrets['grafana']['port'], Response=PREV_RESPONSE,
+                                   Grafanaport=secrets['grafana']['port'],
+                                   Response=f'{str(PREV_RESPONSE)[0:10000]} ...',
+                                   ResponseTooLong=True,
+                                   Responsetime=PREV_RESPONSETIME, Prevquery=PREV_QUERY)
+        elif 1 < len(PREV_RESPONSE) < 10000:
+            return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
+                                   Elastichost=secrets['elastic']['server_exteral'],
+                                   Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
+                                   Grafanaport=secrets['grafana']['port'],
+                                   Response=PREV_RESPONSE,
                                    Responsetime=PREV_RESPONSETIME, Prevquery=PREV_QUERY)
         else:
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
@@ -103,6 +126,8 @@ def query():
                 if request.form['querytype'] == 'sql':
                     if request.form['querysource'] == 'elastic':
                         PREV_RESPONSE = elastic.query_sql(request.form['query'])
+                    elif request.form['querysource'] == 'spark':
+                        PREV_RESPONSE = spark.query_spark_sql(request.form['query'])
                 elif request.form['querytype'] == 'dsl' and request.form['querysource'] == 'elastic':
                     PREV_RESPONSE = elastic.query_dsl(request.form['query'], request.form['index'])
                 PREV_RESPONSETIME = timer.stop()
