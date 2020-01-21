@@ -73,6 +73,12 @@
                           placeholder="" rows="5" readonly>{{ Response }}</textarea>
             </div>
         {% endif %}
+        {% if ResponseTooLong %}
+            <div class="alert alert-primary mb-3" role="alert">
+                The result of the previous query was too long! Visit <a href="/fullresult" target="_blank">this page</a>
+                to view the full result!
+            </div>
+        {% endif %}
 
         {% if Responsetime %}
             <div class="input-group mb-3">

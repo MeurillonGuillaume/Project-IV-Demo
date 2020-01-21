@@ -2,6 +2,7 @@ import logging
 import os
 import zipfile
 from urllib import request
+import pandas as pd
 import findspark
 import json
 from pyspark import SparkContext, SQLContext
@@ -24,13 +25,15 @@ class Spark:
             logging.error(f'Error connecting to Spark: {e}')
 
     def query_spark_sql(self, query):
-        return json.dumps(json.loads(self.__sqlcontext.sql(query)), indent=4)
+        """
+        Query the SQLContext API with SQL queries
+        """
+        response_rdd = self.__sqlcontext.sql(query)
+        return json.dumps(response_rdd.toPandas().to_dict(orient='records'), indent=4)
 
     def load_index(self, indexname):
         """
         Load an Elasticsearch index
-        :param indexname:
-        :return:
         """
         data_rdd = self.__sparkcontext.newAPIHadoopRDD(
             inputFormatClass="org.elasticsearch.hadoop.mr.EsInputFormat",
@@ -42,6 +45,7 @@ class Spark:
                 # specify the read index
                 "es.resource": indexname
             })
+        data_rdd = data_rdd.cache()
         df = self.__sqlcontext.createDataFrame(data_rdd)
         df.registerTempTable(indexname)
 
