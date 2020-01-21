@@ -26,11 +26,11 @@ class Elastic:
         Query Elasticsearch with SQL
         """
         q = str(q).replace('"', '\"')
-        return requests.post(f'http://{self.__host}:{self.__port}/_xpack/sql?format=json&pretty=true',
-                             data=json.dumps({'query': q}),
-                             headers={
-                                 'Content-type': 'application/json'
-                             }).text
+        return json.dumps(requests.post(f'http://{self.__host}:{self.__port}/_xpack/sql?format=json&pretty=true',
+                                        data=json.dumps({'query': q}),
+                                        headers={
+                                            'Content-type': 'application/json'
+                                        }).text, indent=4)
 
     def query_dsl(self, querybody, index):
-        return self.__elastic.search(index=index, body=querybody)
+        return json.dumps(self.__elastic.search(index=index, body=querybody), indent=4)

@@ -29,10 +29,6 @@ elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
 # Create timer
 timer = Timer()
 
-for idx in elastic.get_user_indices():
-    logging.info(f'Registering index {idx}')
-    spark.load_index(idx)
-
 
 def is_user_loggedin():
     """
@@ -48,7 +44,7 @@ def is_user_loggedin():
     return False
 
 
-@app.route('/querypage', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def home():
     """
     Go to the homepage
@@ -117,4 +113,4 @@ def query():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', debug=True, port=5000)
