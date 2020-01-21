@@ -20,7 +20,8 @@ app = Flask(__name__)
 app.secret_key = urandom(75)
 
 # Setup Spark
-# spark = Spark(secrets['spark']['server'], 'Project-IV-Demo-app', secrets['spark']['port'])
+spark = Spark(secrets['spark']['server'], 'Project-IV-Demo-app', secrets['es-hadoop']['version'],
+              secrets['spark']['port'])
 
 # Setup Elasticsearch
 elastic = Elastic(secrets['elastic']['server'], secrets['elastic']['port'])
