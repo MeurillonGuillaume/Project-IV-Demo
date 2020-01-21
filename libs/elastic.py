@@ -33,4 +33,7 @@ class Elastic:
                                         }).text, indent=4)
 
     def query_dsl(self, querybody, index):
+        """
+        Query Elasticsearch using DSL queries
+        """
         return json.dumps(self.__elastic.search(index=index, body=querybody), indent=4)

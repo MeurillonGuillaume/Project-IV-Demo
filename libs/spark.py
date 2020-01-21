@@ -7,7 +7,7 @@ from pyspark import SparkContext, SQLContext
 
 
 class Spark:
-    def __init__(self, host, appname, es_hadoop_ver, port=7077):
+    def __init__(self, host, appname, es_hadoop_ver, internal_nodes, port=7077):
         """
         Connect to the Spark master
         """
@@ -15,8 +15,7 @@ class Spark:
             # findspark.init(spark_home='/usr/local/spark')
             self.__es_hadoop_ver = es_hadoop_ver
             self.__install_elastic_hadoop()
-            self.__host = host
-            self.__port = port
+            self.__internal_nodes = internal_nodes
             self.__sparkcontext = SparkContext(master=f'spark://{host}:{port}', appName=appname)
             self.__sqlcontext = SQLContext(self.__sparkcontext)
             logging.info('Connected to Spark!')
@@ -24,14 +23,21 @@ class Spark:
             logging.error(f'Error connecting to Spark: {e}')
 
     def load_index(self, indexname):
-        # Load data into the Spark cluster
+        """
+        Load an Elasticsearch index
+        :param indexname:
+        :return:
+        """
+        nodestring = ''
+        for node in self.__internal_nodes:
+            nodestring += f'{node},'
         data_rdd = self.__sparkcontext.newAPIHadoopRDD(
             inputFormatClass="org.elasticsearch.hadoop.mr.EsInputFormat",
             keyClass="org.apache.hadoop.io.NullWritable",
             valueClass="org.elasticsearch.hadoop.mr.LinkedMapWritable",
             conf={
                 # specify the node that we are reading data from
-                "es.nodes": f"http://{self.__host}:{self.__port}",
+                "es.nodes": nodestring,
                 # specify the read index
                 "es.resource": indexname
             })
