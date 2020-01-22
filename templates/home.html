@@ -5,8 +5,15 @@
         <ol>
             {% if Indices and Elastichost and Elasticport %}
                 {% for idx in Indices %}
-                    <li><a href="http://{{ Elastichost }}:{{ Elasticport }}/{{ idx }}/_search?pretty=true"
-                           target="_blank">{{ idx }}</a></li>
+                    <li>
+                        <a href="http://{{ Elastichost }}:{{ Elasticport }}/{{ idx }}/_search?pretty=true"
+                           target="_blank">{{ idx }}</a> -
+                        {% if idx in Activeindices %}
+                            <a href="/unload?index={{ idx }}">(unload from Spark)</a>
+                        {% else %}
+                            <a href="/load?index={{ idx }}">(load in Spark)</a>
+                        {% endif %}
+                    </li>
                 {% endfor %}
             {% else %}
                 <li>No indices found</li>

@@ -37,6 +37,13 @@ class Spark:
         """
         return self.__sqlcontext.sql(query)
 
+    def drop_index(self, idx):
+        """
+        Remove an index from the SQLContext
+        """
+        logging.info(f'Dropping index {idx}')
+        self.__sqlcontext.dropTempTable(idx)
+
     def load_index(self, indexname):
         """
         Load an Elasticsearch index
@@ -54,7 +61,7 @@ class Spark:
         data_rdd = data_rdd.cache()
         data_rdd = self.__drop_elastic_ids(data_rdd)
         df = self.__sqlcontext.createDataFrame(data_rdd)
-        df.registerTempTable(indexname)
+        self.__sqlcontext.registerDataFrameAsTable(df, indexname)
 
     def __install_elastic_hadoop(self):
         """

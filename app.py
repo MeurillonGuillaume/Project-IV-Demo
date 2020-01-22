@@ -8,6 +8,8 @@ from libs.elastic import Elastic
 from libs.timer import Timer
 from libs.threader import Threader
 
+ACTIVE_INDICES = set()
+LOADED_INDICES = set()
 PREV_RESPONSE = ''
 PREV_RESPONSETIME = 0
 PREV_QUERY = ''
@@ -34,17 +36,23 @@ timer = Timer()
 # Create threader
 threader = Threader()
 
-# Load data
-for idx in elastic.get_user_indices():
-    logging.info(f'Loading index {idx} into Spark')
-    spark.load_index(idx)
+
+def load_dataset(idx):
+    global LOADED_INDICES, ACTIVE_INDICES
+    if idx not in LOADED_INDICES:
+        logging.info(f'Loading index {idx} into Spark')
+        spark.load_index(idx)
+        LOADED_INDICES.add(idx)
+        ACTIVE_INDICES.add(idx)
 
 
-def load_datasets_into_memory():
-    # Load index data to Spark
+def reload_datasets_into_memory():
+    global ACTIVE_INDICES, LOADED_INDICES
     for idx in elastic.get_user_indices():
         logging.info(f'Loading index {idx} into Spark')
         spark.load_index(idx)
+        ACTIVE_INDICES.add(idx)
+        LOADED_INDICES.add(idx)
 
 
 def is_user_loggedin():
@@ -66,7 +74,7 @@ def reload():
     """
     Reload datasets
     """
-    load_datasets_into_memory()
+    reload_datasets_into_memory()
     return redirect('/')
 
 
@@ -77,6 +85,24 @@ def fullresult():
     """
     if is_user_loggedin():
         return json.dumps(PREV_RESPONSE, indent=4)
+    return redirect('/')
+
+
+@app.route('/load')
+def load():
+    if is_user_loggedin():
+        load_dataset(request.args.get('index'))
+    return redirect('/')
+
+
+@app.route('/unload')
+def unload():
+    global LOADED_INDICES, ACTIVE_INDICES
+    if is_user_loggedin():
+        idx = request.args.get('index')
+        spark.drop_index(idx)
+        LOADED_INDICES.remove(idx)
+        ACTIVE_INDICES.remove(idx)
     return redirect('/')
 
 
@@ -93,19 +119,19 @@ def home():
                                    Grafanaport=secrets['grafana']['port'],
                                    Response=f'{str(PREV_RESPONSE)[0:10000]} ...',
                                    ResponseTooLong=True,
-                                   Responsetime=PREV_RESPONSETIME, Prevquery=PREV_QUERY)
+                                   Responsetime=PREV_RESPONSETIME, Prevquery=PREV_QUERY, Activeindices=ACTIVE_INDICES)
         elif 1 < len(PREV_RESPONSE) < 10000:
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
                                    Elastichost=secrets['elastic']['server_exteral'],
                                    Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
                                    Grafanaport=secrets['grafana']['port'],
                                    Response=PREV_RESPONSE,
-                                   Responsetime=PREV_RESPONSETIME, Prevquery=PREV_QUERY)
+                                   Responsetime=PREV_RESPONSETIME, Prevquery=PREV_QUERY, Activeindices=ACTIVE_INDICES)
         else:
             return render_template('home.html', Loggedin=True, Indices=elastic.get_user_indices(),
                                    Elastichost=secrets['elastic']['server_exteral'],
                                    Elasticport=secrets['elastic']['port'], Grafanaserver=secrets['grafana']['server'],
-                                   Grafanaport=secrets['grafana']['port'])
+                                   Grafanaport=secrets['grafana']['port'], Activeindices=ACTIVE_INDICES)
     return render_template('login.html')
 
 
