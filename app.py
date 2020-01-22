@@ -34,10 +34,17 @@ timer = Timer()
 # Create threader
 threader = Threader()
 
-# Load index data to Spark
+# Load data
 for idx in elastic.get_user_indices():
     logging.info(f'Loading index {idx} into Spark')
     spark.load_index(idx)
+
+
+def load_datasets_into_memory():
+    # Load index data to Spark
+    for idx in elastic.get_user_indices():
+        logging.info(f'Loading index {idx} into Spark')
+        spark.load_index(idx)
 
 
 def is_user_loggedin():
@@ -52,6 +59,15 @@ def is_user_loggedin():
             return True
     logging.warning('User is not logged in')
     return False
+
+
+@app.route('/reload')
+def reload():
+    """
+    Reload datasets
+    """
+    load_datasets_into_memory()
+    return redirect('/')
 
 
 @app.route('/fullresult')

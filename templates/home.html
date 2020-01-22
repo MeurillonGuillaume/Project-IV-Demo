@@ -12,6 +12,25 @@
                 <li>No indices found</li>
             {% endif %}
         </ol>
+        <a href="/reload">
+            <button type="submit" class="btn btn-outline-warning" data-toggle="modal" data-target="#demo2">
+                Load latest data
+            </button>
+        </a>
+        <div class="modal" id="demo2">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Data loading</h4>
+                        <button type="button" class="close" data-dismiss="modal">x</button>
+                    </div>
+                    <!-- Modal body -->
+                    <div class="modal-body">Loading new data, please wait ...
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="col-lg-6 text-center bg-light pt-2 pb-2">
