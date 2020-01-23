@@ -49,10 +49,9 @@ def load_dataset(idx):
 def reload_datasets_into_memory():
     global ACTIVE_INDICES, LOADED_INDICES
     for idx in elastic.get_user_indices():
-        logging.info(f'Loading index {idx} into Spark')
-        spark.load_index(idx)
-        ACTIVE_INDICES.add(idx)
-        LOADED_INDICES.add(idx)
+        if idx in LOADED_INDICES:
+            logging.info(f'Loading index {idx} into Spark')
+            spark.load_index(idx)
 
 
 def is_user_loggedin():
